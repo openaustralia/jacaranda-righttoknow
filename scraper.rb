@@ -64,7 +64,8 @@ if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_da
 
   # build the sentence with new sign up stats
   text = new_requests_last_fortnight.to_s +
-        " new requests were made through Right To Know last fortnight :revolving_hearts:"
+        " new requests were made through Right To Know last fortnight :revolving_hearts:\n"
+  text += "Our contributors helped people with 19 annotations :heartbeat::heartpulse::heartbeat::heartpulse:"
 
   puts "Post the message to Slack"
   if ENV["MORPH_LIVE_MODE"].eql? "true"
