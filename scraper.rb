@@ -35,6 +35,18 @@ def get_annontations_on_right_to_know_between(start_date, end_date)
   end
 end
 
+def get_successes_from_right_to_know_between(start_date, end_date)
+  page = Mechanize.new.get('https://www.righttoknow.org.au/search/status:successful%2030/1/2017..12/2/2017.html?page=2')
+  # TODO: remove the if logic and just get the results,
+  #       once https://github.com/openaustralia/righttoknow/issues/673 is fixed.
+  if page.at(".foi_results")
+    page.at(".foi_results").text.split.last
+  else
+    page = Mechanize.new.get('https://www.righttoknow.org.au/search/status:successful%2030/1/2017..12/2/2017.html?page=1')
+    page.at(".foi_results").text.split.last
+  end
+end
+
 class Numeric
   def percent_of(n)
     self.to_f / n.to_f * 100.0
@@ -74,12 +86,13 @@ if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_da
   puts "Collect new requests information from Right To Know"
   new_requests_last_fortnight = get_new_requests_on_right_to_know_between(last_fortnight.first, last_fortnight.last)
   annotations_last_fortnight = get_annontations_on_right_to_know_between(last_fortnight.first, last_fortnight.last)
+  successes_last_fortnight = get_successes_from_right_to_know_between(last_fortnight.first, last_fortnight.last)
 
   # build the sentence with new sign up stats
   text = new_requests_last_fortnight.to_s +
         " new requests were made through Right To Know last fortnight :saxophone:\n"
   text += "Our contributors helped people with #{annotations_last_fortnight} annotations :heartbeat:\n"
-  text += "12 requests were marked successful! :trophy:"
+  text += "#{successes_last_fortnight} requests were marked successful! :trophy:"
 
   puts "Post the message to Slack"
   if ENV["MORPH_LIVE_MODE"].eql? "true"
