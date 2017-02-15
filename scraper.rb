@@ -40,11 +40,6 @@ def get_planningalerts_data_between(attribute, start_date, end_date)
   new_signups_for_period
 end
 
-def get_total_subscriber_count
-  page = Mechanize.new.get("https://www.planningalerts.org.au/performance")
-  page.at('#content h2').text.split(" ").first.to_i
-end
-
 class Numeric
   def percent_of(n)
     self.to_f / n.to_f * 100.0
@@ -82,7 +77,6 @@ end
 puts "Check if it has collected data in the last fortnight"
 if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_date.to_s}'").empty? rescue true)
   puts "Collect total subscribers information from PlanningAlerts"
-  total_planningalerts_subscribers = get_total_subscriber_count
 
   puts "Collect new subscriber/unsubscriber information from PlanningAlerts"
   new_signups_last_fortnight = get_planningalerts_data_between("new_alert_subscribers", last_fortnight.first, last_fortnight.last)
@@ -97,8 +91,6 @@ if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_da
   text += " " + change_sentence(new_signups_last_fortnight, new_signups_fortnight_before_last) + "\n"
   text += unsubscribers_last_fortnight.to_s + " people left. "
   text += change_sentence(unsubscribers_last_fortnight, unsubscribers_fortnight_before_last) + "\n"
-  text += "There are now " + ActiveSupport::NumberHelper.number_to_human(total_planningalerts_subscribers).downcase +
-          " PlanningAlerts subscribers! :star2:"
 
   puts "Post the message to Slack"
   if post_message_to_slack(text) === "ok"
