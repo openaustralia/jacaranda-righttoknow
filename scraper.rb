@@ -18,26 +18,9 @@ def post_message_to_slack(text)
   RestClient.post(ENV["MORPH_SLACK_CHANNEL_WEBHOOK_URL"], request_body.to_json)
 end
 
-def planningalerts_subscribers_data
-  # Get the data
-  @planningalerts_subscribers_data ||= JSON.parse(
-    RestClient.get("https://www.planningalerts.org.au/performance/alerts.json")
-  )
-end
-
-def get_planningalerts_data_between(attribute, start_date, end_date)
-  new_signups_for_period = 0
-
-  period = (start_date..end_date).to_a
-  period.each do |date|
-    planningalerts_subscribers_data.each do |row|
-      if row["date"].eql? date.to_s
-        new_signups_for_period += row[attribute]
-      end
-    end
-  end
-
-  new_signups_for_period
+def get_new_requests_on_right_to_know_between(start_date, end_date)
+  page = Mechanize.new.get('https://www.righttoknow.org.au/search/variety:sent%2030/1/2017..12/2/2017.html?page=2')
+  page.at(".foi_results").text.split.last
 end
 
 class Numeric
@@ -76,21 +59,12 @@ end
 
 puts "Check if it has collected data in the last fortnight"
 if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_date.to_s}'").empty? rescue true)
-  puts "Collect total subscribers information from PlanningAlerts"
-
-  puts "Collect new subscriber/unsubscriber information from PlanningAlerts"
-  new_signups_last_fortnight = get_planningalerts_data_between("new_alert_subscribers", last_fortnight.first, last_fortnight.last)
-  new_signups_fortnight_before_last = get_planningalerts_data_between("new_alert_subscribers", fortnight_before_last.first, fortnight_before_last.last)
-
-  unsubscribers_last_fortnight = get_planningalerts_data_between("emails_completely_unsubscribed", last_fortnight.first, last_fortnight.last)
-  unsubscribers_fortnight_before_last = get_planningalerts_data_between("emails_completely_unsubscribed", fortnight_before_last.first, fortnight_before_last.last)
+  puts "Collect new requests information from Right To Know"
+  new_requests_last_fortnight = get_new_requests_on_right_to_know_between(last_fortnight.first, last_fortnight.last)
 
   # build the sentence with new sign up stats
-  text = new_signups_last_fortnight.to_s +
-        " people signed up for PlanningAlerts last fortnight :revolving_hearts:"
-  text += " " + change_sentence(new_signups_last_fortnight, new_signups_fortnight_before_last) + "\n"
-  text += unsubscribers_last_fortnight.to_s + " people left. "
-  text += change_sentence(unsubscribers_last_fortnight, unsubscribers_fortnight_before_last) + "\n"
+  text = new_requests_last_fortnight.to_s +
+        " new requests were made through Right To Know last fortnight :revolving_hearts:"
 
   puts "Post the message to Slack"
   if ENV["MORPH_LIVE_MODE"].eql? "true"
