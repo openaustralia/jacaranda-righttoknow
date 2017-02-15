@@ -30,32 +30,9 @@ def get_count_for_right_to_know_query_between(query, start_date, end_date)
   end
 end
 
-class Numeric
-  def percent_of(n)
-    self.to_f / n.to_f * 100.0
-  end
-end
-
-def percentage_change_in_words(change)
-  text = change.to_s.delete("-") + "% "
-  text += change > 0 ? "more" : "less"
-  text
-end
-
-def change_sentence(last_fortnight, fortnight_before_last)
-  percentage_change_from_fortnight_before = last_fortnight.percent_of(fortnight_before_last)- 100
-  percentage_change_from_fortnight_before = percentage_change_from_fortnight_before.round(1).floor
-
-  change_sentence = "That’s " + percentage_change_in_words(percentage_change_from_fortnight_before) + " than the fortnight before."
-end
-
 beginning_of_fortnight = 1.fortnight.ago.beginning_of_week.to_date
 end_of_fortnight = 1.week.ago.end_of_week.to_date
 last_fortnight = (beginning_of_fortnight..end_of_fortnight).to_a
-
-beginning_of_fortnight_before_last = 2.fortnight.ago.beginning_of_week.to_date
-end_of_fortnight_before_last = 3.weeks.ago.end_of_week.to_date
-fortnight_before_last = (beginning_of_fortnight_before_last..end_of_fortnight_before_last)
 
 # if it's been a fortnight since the last message post a new one
 if ENV["MORPH_LIVE_MODE"].eql? "true"
