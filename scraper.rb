@@ -93,15 +93,14 @@ if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_da
   text += change_sentence(unsubscribers_last_fortnight, unsubscribers_fortnight_before_last) + "\n"
 
   puts "Post the message to Slack"
-  if post_message_to_slack(text) === "ok"
-    # record the message and the date sent to the db
-    puts "Save the message to the db"
-
-    if ENV["MORPH_LIVE_MODE"].eql? "true"
+  if ENV["MORPH_LIVE_MODE"].eql? "true"
+    if post_message_to_slack(text) === "ok"
+      # record the message and the date sent to the db
+      puts "Save the message to the db"
       ScraperWiki.save_sqlite([:date_posted], {date_posted: Date.today.to_s, text: text})
-    else
-      puts text
     end
+  else
+    puts text
   end
 else
   p "I’ve already spoken to the team this fortnight"
