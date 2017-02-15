@@ -1,7 +1,6 @@
 # This is a template for a Ruby scraper on morph.io (https://morph.io)
 # including some code snippets below that you should find helpful
 
-require 'octokit'
 require 'scraperwiki'
 require 'mechanize'
 require 'rest-client'
@@ -17,23 +16,6 @@ def post_message_to_slack(text)
   request_body.merge!(channel: "#bottesting") unless ENV["MORPH_LIVE_MODE"].eql? "true"
 
   RestClient.post(ENV["MORPH_SLACK_CHANNEL_WEBHOOK_URL"], request_body.to_json)
-end
-
-def git_commits_between_dates(start_date, end_date)
-  github_client = Octokit::Client.new :access_token => ENV["MORPH_GITHUB_OAUTH_ACCESS_TOKEN"]
-  response = github_client.get(
-    "repos/openaustralia/planningalerts/commits?since=#{start_date.to_s}&until#{end_date.to_s}"
-  )
-
-  commits_count = response.count
-
-  last_response = github_client.last_response
-  until last_response.rels[:next].nil?
-    last_response = last_response.rels[:next].get
-    commits_count += last_response.data.count
-  end
-
-  commits_count
 end
 
 def planningalerts_subscribers_data
@@ -99,9 +81,6 @@ end
 
 puts "Check if it has collected data in the last fortnight"
 if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_date.to_s}'").empty? rescue true)
-  puts "Collect information from GitHub"
-  commits_count = git_commits_between_dates(last_fortnight.first, last_fortnight.last)
-
   puts "Collect total subscribers information from PlanningAlerts"
   total_planningalerts_subscribers = get_total_subscriber_count
 
@@ -118,7 +97,6 @@ if (ScraperWiki.select("* from data where `date_posted`>'#{1.fortnight.ago.to_da
   text += " " + change_sentence(new_signups_last_fortnight, new_signups_fortnight_before_last) + "\n"
   text += unsubscribers_last_fortnight.to_s + " people left. "
   text += change_sentence(unsubscribers_last_fortnight, unsubscribers_fortnight_before_last) + "\n"
-  text += "You shipped #{commits_count} commits in the same period.\n" unless commits_count.zero?
   text += "There are now " + ActiveSupport::NumberHelper.number_to_human(total_planningalerts_subscribers).downcase +
           " PlanningAlerts subscribers! :star2:"
 
