@@ -19,18 +19,18 @@ def post_message_to_slack(text)
 end
 
 def get_new_requests_on_right_to_know_between(start_date, end_date)
-  page = Mechanize.new.get('https://www.righttoknow.org.au/search/variety:sent%2030/1/2017..12/2/2017.html?page=2')
+  page = Mechanize.new.get("https://www.righttoknow.org.au/search/variety:sent%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?page=2")
   page.at(".foi_results").text.split.last
 end
 
 def get_annontations_on_right_to_know_between(start_date, end_date)
-  page = Mechanize.new.get('https://www.righttoknow.org.au/search/variety:comment%2030/1/2017..12/2/2017.html?page=2')
+  page = Mechanize.new.get("https://www.righttoknow.org.au/search/variety:comment%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?page=2")
   # TODO: remove the if logic and just get the results,
   #       once https://github.com/openaustralia/righttoknow/issues/673 is fixed.
   if page.at(".foi_results")
     page.at(".foi_results").text.split.last
   else
-    page = Mechanize.new.get('https://www.righttoknow.org.au/search/variety:comment%2030/1/2017..12/2/2017.html?page=1')
+    page = Mechanize.new.get("https://www.righttoknow.org.au/search/variety:comment%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?page=1")
     page.at(".foi_results").text.split.last
   end
 end
