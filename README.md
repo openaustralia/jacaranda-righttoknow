@@ -31,7 +31,6 @@ will have a better impact.
 
 This program depends on three environment variables:
 
-* *GitHub OAuth token* for your github account
 * *Slack channel webhook url* to post the message to
 * *Live mode* to make it actually post to the Slack channel #townsquare and save to the database
 
@@ -40,7 +39,6 @@ and [use dotenv](https://github.com/bkeepers/dotenv) to load them as the scraper
 
 ```
 MORPH_SLACK_CHANNEL_WEBHOOK_URL="https://hooks.slack.com/services/XXXXXXXXXXXXX"
-MORPH_GITHUB_OAUTH_ACCESS_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 MORPH_LIVE_MODE=false
 ```
 
