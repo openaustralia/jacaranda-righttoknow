@@ -21,7 +21,7 @@ and what we do with the information.
 
 Currently Jacaranda tells you about:
 
-* The number of requests that were successful in the last fortnight
+* The number of new requests in the last fortnight
 * The number of annotations in the last fortnight
 
 Feel free to change the text or the information in presents to what you think
