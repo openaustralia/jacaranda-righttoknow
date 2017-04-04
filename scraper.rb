@@ -18,16 +18,20 @@ def post_message_to_slack(text)
   RestClient.post(ENV["MORPH_SLACK_CHANNEL_WEBHOOK_URL"], request_body.to_json)
 end
 
+def extract_value_from_page(page)
+  page.at(".foi_results").text.split.last
+end
+
 def get_count_for_right_to_know_query_between(query, start_date, end_date)
   base_url = "https://www.righttoknow.org.au/search/#{query}%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?"
   page = Mechanize.new.get(base_url + "page=2")
   # TODO: remove the if logic and just get the results,
   #       once https://github.com/openaustralia/righttoknow/issues/673 is fixed.
   if page.at(".foi_results")
-    page.at(".foi_results").text.split.last
+    extract_value_from_page(page)
   else
     page = Mechanize.new.get(base_url + "page=1")
-    page.at(".foi_results").text.split.last
+    extract_value_from_page(page)
   end
 end
 
