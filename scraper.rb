@@ -24,14 +24,21 @@ end
 
 def get_count_for_right_to_know_query_between(query, start_date, end_date)
   base_url = "https://www.righttoknow.org.au/search/#{query}%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?"
-  page = Mechanize.new.get(base_url + "page=2")
-  # TODO: remove the if logic and just get the results,
-  #       once https://github.com/openaustralia/righttoknow/issues/673 is fixed.
-  if page.at(".foi_results")
-    extract_value_from_page(page)
-  else
-    page = Mechanize.new.get(base_url + "page=1")
-    extract_value_from_page(page)
+
+  # TODO: This iterates through pages looking for one with trustworthy
+  #       results. It’s guessing that the page number of the last page
+  #       of results is no greater than 10. This is based on Right To Know’s current usage,
+  #       with a lot of padding built in. Currently the 3rd page is the last.
+  #       Remove this logic and just get the results, once
+  #       https://github.com/openaustralia/righttoknow/issues/673 is fixed.
+  ("1".."10").to_a.reverse.each do |n|
+    page = Mechanize.new.get(base_url + "page=" + n)
+
+    if page.at(".foi_results")
+      return extract_value_from_page(page)
+    end
+
+    sleep 1
   end
 end
 
