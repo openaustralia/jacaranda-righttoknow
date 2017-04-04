@@ -19,13 +19,14 @@ def post_message_to_slack(text)
 end
 
 def get_count_for_right_to_know_query_between(query, start_date, end_date)
-  page = Mechanize.new.get("https://www.righttoknow.org.au/search/#{query}%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?page=2")
+  base_url = "https://www.righttoknow.org.au/search/#{query}%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?"
+  page = Mechanize.new.get(base_url + "page=2")
   # TODO: remove the if logic and just get the results,
   #       once https://github.com/openaustralia/righttoknow/issues/673 is fixed.
   if page.at(".foi_results")
     page.at(".foi_results").text.split.last
   else
-    page = Mechanize.new.get("https://www.righttoknow.org.au/search/#{query}%20#{start_date.strftime("%D")}..#{end_date.strftime("%D")}.html?page=1")
+    page = Mechanize.new.get(base_url + "page=1")
     page.at(".foi_results").text.split.last
   end
 end
