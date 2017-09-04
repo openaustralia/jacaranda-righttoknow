@@ -1,4 +1,4 @@
-# Jacaranda
+# Jacaranda [Depreciated because this Right To Know version has been incorporated into [the original version](https://github.com/openaustralia/jacaranda)]
 
 *A watchful tree and slack messenger to keep you informed of the use of Right To Know.*
 
